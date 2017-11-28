@@ -39,18 +39,34 @@ There are two mode inputs defined on FPGA, mode_a and mode_b. Externally they ar
 Mode_b selects PAL or NTSC mode of scaler.
 Mode_a can be used to momentary enforce syncing HDTV domain from input video if you do not want to wait about 20sec until digital PLL will lock for itself. Note that while that syncing by mode_a switch is enforced, output HDMI signal gets invalid (because pixel clock will run asynchronously to VSYNC) but will immediately be restored correct afterwards.
 
-PDF schematics in docs section describes signal flow within the FPGA which is pretty straightforward. A big mess of LUT blocks betweeen YCC -> RGB converter and HDMI out is vsync_visualizer module, meant for debugging timebase corrector DPLL. It shows a small vertical dash in the exact time of received  analog VSYNC against HDTV frame. If time is too early, dash is blue, if too late it is red, and if right on - green.
+PDF schematics in docs section describes signal flow within the FPGA which is pretty straightforward. 
+
+There are two clock domains. First is dotclock 27Mhz derived from 5150. It is used to fold video data to 16 bits and feed it into 32K x 16 FIFO buffer.
+
+Second clock domain is generated from crystal on board and used to sync HDTV part. Pixel clock is 74.25MHz for 720p50 derived from PAL and 74.25/1.001 (damn it!) for 720p60/NTSC.
+
+It is used to fetch data from FIFO and fill intermediate 720-pixel buffer which is used by deinterlacer and scaler. Also this clock drives 720p raster generator. Depending on current HDTV line number we are requesting new data from FIFO or do nothing, that way line just repeats itself doing line-tripling to convert NTSC sub-field lines to 720p or doing alternate doublings/triplings for PAL mode. (Bob deinterlacer combined with nearest-neighbour scaler, zero delay but some flicker, sorry)  
+
+I2C module is pretty simple, it initializes TVP5150 with 3 bytes on startup.
+
+Reset controller is just a reset timer.
+
+A big mess of LUT blocks betweeen YCC -> RGB converter and HDMI out is vsync_visualizer module, meant for debugging timebase corrector DPLL. It shows a small vertical dash in the exact time of received  analog VSYNC against HDTV frame. If time is too early, dash is blue, if too late it is red, and if right on - green.
 
 Based on this timing relation (generated in FIFO_reader module) we are bumping HDTV timing sligtly faster or slower to slowly lock output frame to input timing. Slow adjustment of HDTV clock is based on pshift trick possible on MMCM module of Xilinx 7 series devices. Single pshift shifts clock just for a few picoseconds. But if done continuously it will roll clock phase equivalent to about 500ppm frequency shift up/down. Pscontroller module controls this.
 
 https://forums.xilinx.com/xlnx/board/crawl_message?board.id=7Series&message.id=15086
+
+This project uses some generated intellectual property from Vivado. Everything is included in free license, but to compile this project you need to generate this IP yourself. I provided screenshots for all components (PLLs a and FIFO block). Actually only one component is tricky and needs to have all dividers entered as is (mult1001) others are relatively straightforward.
+
+I have included compiled bitstream file and EEPROM config file, so if you want to try exactly the same dev board with pinout described in constraints xdc file, you can just download bitstream into FPGA.
 
 
 Some cardinal sins of the existing design :)
 
 1. Timings are violated many times in RTL (mainly because Vivado does not know well that there are two timing domains, needs better constraints file). Still no major glitches visible.
 2. No auto PAL/SECAM detection. You need to set manual switch.
-3. Moving PAL/SECAM switch violates FPGA PLLE module usage rules when it needs to be reset after clock change, and we do this even without switch debounce to add the insult. Still works most of the time for some reason :). Theoretically, we need to push FPGA reset button each time after change PAL/SECAM in this release (or add proper debounce and PLLE reset)
+3. Moving PAL/SECAM switch violates FPGA MMCME module usage rules when it needs to be reset after clock change, and we do this even without switch debounce to add the insult. Still works most of the time for some reason :). Theoretically, we need to push FPGA reset button each time after change PAL/SECAM in this release (or add proper debounce and MMCME reset)
 
 4. Locking onto input video takes about 20 seconds. 
 5. When not locked (no time to sync) or when input video is heavily distorted because of reception interference, FIFO buffer gets overflown/underflown and video output gets garbled. HDMI timing styas rock solid though. May be fixed in future releases but not much problem because it shows only at startup or very momentary in the flight. Adding better FIFO filling and reading discipline will help. TI promised us that TVP5150AM1 BT.656 line length is always 720 pixels, but this seems not to be a case when input video is distorted.

@@ -5,7 +5,7 @@ This is low-latency analog video to 720p HDMI video converter
 It is designed for aggressive FPV flying, and so, optimized for minimal latency possible.
 
 
-YCC -> RGB converter and HDMI output modules are borrowed from Mike Field HDMI processing progect
+YCC -> RGB converter and HDMI output modules are borrowed from Mike Field HDMI processing project
 https://github.com/hamsternz/Artix-7-HDMI-processing
 I2C sender is borrowed (and slightly fixed) from Mike too
 

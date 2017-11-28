@@ -4,6 +4,7 @@ This is low-latency analog video to 720p HDMI video converter
 
 It is designed for aggressive FPV flying, and so, optimized for minimal latency possible.
 
+
 YCC -> RGB converter and HDMI output modules are borrowed from Mike Field HDMI processing progect
 https://github.com/hamsternz/Artix-7-HDMI-processing
 I2C sender is borrowed (and slightly fixed) from Mike too
@@ -11,6 +12,14 @@ I2C sender is borrowed (and slightly fixed) from Mike too
 The circuit is composed from Ti TVP5150AM1 PAL/NTSC digital video decoder and Artix 7 FPGA. Some SDRAM is present on the development board, but not used now. 
 
 Connections betwen FPGA chip and TVP5150 are pretty straightforward an can be derived from constraints file. I2C SDA and SCL lines are pulled-up to 3.3V bus with 2.2k resistors. Also, there is a small shottky diode in line with FPGA SCL out to mimic open-drain behavior. That's a last-minute hack, sorry :)
+
+Also, this TVP5150 module lacks chip reset connection. You need to route a small wire to TVP's reset pin.
+
+HDMI connection (DVI-D signalling stricly speaking) is made from HDMI cable cut in half. No big horrors here, but we need to remember that we are working witn picosecond timings (742.5MHz bit rate!). So all twisted pairs shall remain twisted and tidy to the end, no significant loops allowed. Technically, passing HDMI thru 100mil pin headers is not the best idea, but its TMDS signalling seems to be robust enough to survive with this.
+
+Some HDMI devices (Glyph included) needs +5V signal on HDMI cable to know the source is present. I used ~300 Ohm current-limiting resistor in series to avoid disasters.
+
+
 
 There are two mode inputs defined on FPGA, mode_a and mode_b. Externally they are connected to two grounded switches and two 10K pull-up resistors to 3.3V.
 
@@ -28,10 +37,10 @@ Some cardinal sins of the existing design :)
 
 1. Timings are violated many times in RTL (mainly because Vivado does not know well that there are two timing domains, needs better constraints file). Still no major glitches visible.
 2. No auto PAL/SECAM detection. You need to set manual switch.
-3. Moving PAL/SECAM switch violates FPGA PLLE module usage rules when it needs to be reset after clock change, and we do this even without switch debounce to add the insult. Still works most of the time for some reason :). Theoretically, we need to push FPGA reset button each time after you change PAL/SECAM in this release (or add proper debounce and PLLE reset)
+3. Moving PAL/SECAM switch violates FPGA PLLE module usage rules when it needs to be reset after clock change, and we do this even without switch debounce to add the insult. Still works most of the time for some reason :). Theoretically, we need to push FPGA reset button each time after change PAL/SECAM in this release (or add proper debounce and PLLE reset)
 
 4. Locking onto input video takes about 20 seconds. 
-5. When not locked (no time to sync) or when input video is heavily distorted because of reception interference, FIFO buffer gets overflows/underflown and video output gets garbled. HDMI timing styas rock solid though. May be fixed in future releases but not much problem because it shows only at startup or very momentary in the flight. Adding better FIFO filling and reading discipline will help. TI promised us that its TVP5150AM1 BT.656 line length is always 720 pixels, but this seems not to be a case when input video is distorted.
-6. Here is a big mess with 5 PLLE and one MMCME modules to generate all proper timings. One big source of this mess is NTSC's historical idiotic 1.001 frequency ratio which is not easy to syntheze in existing FPGA PLLS. As Google loves to say "Sorry about this" ;) Very likely it can be optimized a little bit, but even in current state does not seem to generate excessive clock jitter to cause any HDMI sync problems.
+5. When not locked (no time to sync) or when input video is heavily distorted because of reception interference, FIFO buffer gets overflown/underflown and video output gets garbled. HDMI timing styas rock solid though. May be fixed in future releases but not much problem because it shows only at startup or very momentary in the flight. Adding better FIFO filling and reading discipline will help. TI promised us that its TVP5150AM1 BT.656 line length is always 720 pixels, but this seems not to be a case when input video is distorted.
+6. Here is a big mess with 5 PLLE and one MMCME modules to generate all proper timings. One big source of this mess is NTSC's historical idiotic 1.001 frequency ratio which is not easy to syntheze in the existing FPGA PLLS. As Google loves to say "Sorry about this" ;) Very likely it can be optimized a little bit, but even in current state does not seem to generate excessive clock jitter to cause any HDMI sync problems.
 
 

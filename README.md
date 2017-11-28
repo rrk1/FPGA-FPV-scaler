@@ -54,6 +54,6 @@ Some cardinal sins of the existing design :)
 
 4. Locking onto input video takes about 20 seconds. 
 5. When not locked (no time to sync) or when input video is heavily distorted because of reception interference, FIFO buffer gets overflown/underflown and video output gets garbled. HDMI timing styas rock solid though. May be fixed in future releases but not much problem because it shows only at startup or very momentary in the flight. Adding better FIFO filling and reading discipline will help. TI promised us that TVP5150AM1 BT.656 line length is always 720 pixels, but this seems not to be a case when input video is distorted.
-6. Here is a big mess with 5 PLLE and one MMCME modules to generate all proper timings. One big source of this mess is NTSC's historical idiotic 1.001 frequency ratio which is not easy to syntheze in the existing FPGA PLLS. As Google loves to say "Sorry about this" ;) Very likely this corcuits can be optimized a little bit with redundant PLLS thrown out, but even in current state does not seem to generate excessive clock jitter to cause any HDMI sync problems.
+6. Here is a big mess with 5 PLLE and one MMCME modules to generate all proper timings. One big source of this mess is NTSC's historical idiotic 1.001 frequency ratio which is not easy to syntheze in the existing FPGA PLLS. As Google loves to say "Sorry about this" ;) Very likely this circuit can be optimized a little bit with redundant PLLS thrown out, but even in current ugly state it does not seem to generate excessive clock jitter to cause any HDMI sync problems.
 
 

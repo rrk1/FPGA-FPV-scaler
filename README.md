@@ -24,9 +24,9 @@ Some HDMI devices (Glyph included) needs +5V signal on HDMI cable to know the so
 There are two mode inputs defined on FPGA, mode_a and mode_b. Externally they are connected to two grounded switches and two 10K pull-up resistors to 3.3V.
 
 Mode_b selects PAL or NTSC mode of scaler.
-Mode_a can be used to momentary enforce syncing HDTV domain from input video if you do not want to wait about 20sec until digital PLL will lock for itself. Not that wheile that syncing by mode_a switch is enforced output HDMI signal gets invalid (because pixel clock will run asynchronously to VSYNC) but will immediately be restored correct afterwards.
+Mode_a can be used to momentary enforce syncing HDTV domain from input video if you do not want to wait about 20sec until digital PLL will lock for itself. Note that while that syncing by mode_a switch is enforced, output HDMI signal gets invalid (because pixel clock will run asynchronously to VSYNC) but will immediately be restored correct afterwards.
 
-PDF schematics in docs section describes signal flow within the circuit which is pretty straightforward. A big mess of LUTs betweeen YCC -> RGB converter and HDMI out is vsync_visualizer module, meant for debugging timebase coorrector DPLL debugging. It shows a small vertical dash in the exact time of received  analog VSYNC against HDTV frame. If time is too early, dash is blue, if too late it is red, and if right on - green.
+PDF schematics in docs section describes signal flow within the FPGA which is pretty straightforward. A big mess of LUT blocks betweeen YCC -> RGB converter and HDMI out is vsync_visualizer module, meant for debugging timebase corrector DPLL. It shows a small vertical dash in the exact time of received  analog VSYNC against HDTV frame. If time is too early, dash is blue, if too late it is red, and if right on - green.
 
 Based on this timing relation (generated in FIFO_reader module) we are bumping HDTV timing sligtly faster or slower to slowly lock output frame to input timing. Slow adjustment of HDTV clock is based on pshift trick possible on MMCM module of Xilinx 7 series devices. Single pshift shifts clock just for a few picoseconds. But if done continuously it will roll clock phase equivalent to about 500ppm frequency shift up/down. Pscontroller module controls this.
 

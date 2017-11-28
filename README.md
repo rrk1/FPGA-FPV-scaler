@@ -65,8 +65,8 @@ I have included compiled bitstream file and EEPROM config file, so if you want t
 Some cardinal sins of the existing design :)
 
 1. Timings are violated many times in RTL (mainly because Vivado does not know well that there are two timing domains, needs better constraints file). Still no major glitches visible.
-2. No auto PAL/SECAM detection. You need to set manual switch.
-3. Moving PAL/SECAM switch violates FPGA MMCME module usage rules when it needs to be reset after clock change, and we do this even without switch debounce to add the insult. Still works most of the time for some reason :). Theoretically, we need to push FPGA reset button each time after change PAL/SECAM in this release (or add proper debounce and MMCME reset)
+2. No auto PAL/NTSC detection. You need to set manual switch.
+3. Moving PAL/NTSC switch violates FPGA MMCME module usage rules when it needs to be reset after clock change, and we do this even without switch debounce to add the insult. Still works most of the time for some reason :). Theoretically, we need to push FPGA reset button each time after change PAL/NTSC in this release (or add proper debounce and MMCME reset)
 
 4. Locking onto input video takes about 20 seconds. 
 5. When not locked (no time to sync) or when input video is heavily distorted because of reception interference, FIFO buffer gets overflown/underflown and video output gets garbled. HDMI timing styas rock solid though. May be fixed in future releases but not much problem because it shows only at startup or very momentary in the flight. Adding better FIFO filling and reading discipline will help. TI promised us that TVP5150AM1 BT.656 line length is always 720 pixels, but this seems not to be a case when input video is distorted.

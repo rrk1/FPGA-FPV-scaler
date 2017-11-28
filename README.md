@@ -30,7 +30,7 @@ Also, this TVP5150 module lacks chip reset connection. You need to route a small
 
 HDMI connection (DVI-D signalling strictly speaking) is made from HDMI cable cut in half. No big horrors here, but we need to remember that we are working witn picosecond timings (742.5MHz bit rate!). So all twisted pairs shall remain twisted and tidy to the end, no significant loops allowed. All shields shall be interconnected and grounded to module ground bus with shortest wire possible. Technically, passing HDMI thru 100mil pin headers is not the best idea, but its TMDS signalling seems to be robust enough to survive this.
 
-Some HDMI devices (Glyph included) needs active +5V signal on HDMI cable to know the source is present. I used ~300 Ohm current-limiting resistor in series to avoid disasters.
+Some HDMI devices (Glyph included) needs active +5V signal on HDMI cable to know the source is present. I used ~200 Ohm current-limiting resistor in series to avoid disasters.
 
 
 

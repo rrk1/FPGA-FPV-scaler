@@ -11,6 +11,19 @@ I2C sender is borrowed (and slightly fixed) from Mike too
 
 The circuit is composed from Ti TVP5150AM1 PAL/NTSC digital video decoder and Artix 7 FPGA. Some SDRAM is present on the development board, but not used now. 
 
+Hardware used:
+
+dev board
+https://www.aliexpress.com/item/Xilinx-FPGA-Artix7-Artix-7-Development-Board-XC7A35T-Core-Board-with-SDRAM/32799960711.html
+
+platform cable
+https://www.aliexpress.com/item/Xilinx-Platform-USB-Download-Cable-Jtag-Programmer-for-FPGA-CPLD-XC2C256/32691266814.html
+
+5150 dev module
+https://www.aliexpress.com/item/TVP5150-Module-FPGA-SDRAM-PAL-Video-Decoding-Analog-AV-Input-Camera-VGA-Display/32456112655.html
+
+
+
 Connections betwen FPGA chip and TVP5150 are pretty straightforward and can be derived from constraints file. I2C SDA and SCL lines are pulled-up at 5150 side to 3.3V with 2.2k resistors. Also, there is a small shottky diode in line with FPGA SCL out to mimic open-drain behavior. That's a last-minute hack, sorry :)
 
 Also, this TVP5150 module lacks chip reset connection. You need to route a small wire to TVP's reset pin.
